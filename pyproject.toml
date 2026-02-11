@@ -1,0 +1,31 @@
+[project]
+name = "mcp-gmail"
+version = "0.1.0"
+description = "MCP server for Gmail API — list, read, send, draft, label, and trash emails"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = [
+    "mcp>=1.8.0",
+    "google-auth>=2.28.1",
+    "google-auth-oauthlib>=1.2.0",
+    "google-api-python-client>=2.117.0",
+]
+
+[[project.authors]]
+name = "MindMade"
+
+[project.urls]
+"Homepage" = "https://github.com/MindMade/mcp-gmail"
+"Bug Tracker" = "https://github.com/MindMade/mcp-gmail/issues"
+"Repository" = "https://github.com/MindMade/mcp-gmail.git"
+
+[project.scripts]
+mcp-gmail = "mcp_gmail:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mcp_gmail"]
