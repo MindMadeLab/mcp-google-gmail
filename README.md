@@ -18,7 +18,7 @@ An MCP (Model Context Protocol) server that gives AI assistants like Claude full
 uvx mcp-gmail@latest
 
 # From source
-git clone https://github.com/MindMade/mcp-gmail.git
+git clone https://github.com/MindMadeLab/mcp-gmail.git
 cd mcp-gmail
 uv run mcp-gmail
 ```

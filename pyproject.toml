@@ -13,12 +13,12 @@ dependencies = [
 ]
 
 [[project.authors]]
-name = "MindMade"
+name = "MindMadeLab"
 
 [project.urls]
-"Homepage" = "https://github.com/MindMade/mcp-gmail"
-"Bug Tracker" = "https://github.com/MindMade/mcp-gmail/issues"
-"Repository" = "https://github.com/MindMade/mcp-gmail.git"
+"Homepage" = "https://github.com/MindMadeLab/mcp-gmail"
+"Bug Tracker" = "https://github.com/MindMadeLab/mcp-gmail/issues"
+"Repository" = "https://github.com/MindMadeLab/mcp-gmail.git"
 
 [project.scripts]
 mcp-gmail = "mcp_gmail:main"
