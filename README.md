@@ -1,109 +1,236 @@
-# mcp-gmail: AI Assistant Gateway to Gmail
+<div align="center">
+  <b>mcp-gmail</b>
 
-An MCP (Model Context Protocol) server that gives AI assistants like Claude full access to Gmail — list, read, search, send, draft, label, and trash emails.
+  <p align="center">
+    <i>Your AI Assistant's Gateway to Gmail!</i> 📧
+  </p>
 
-## Quick Start
+[![PyPI - Version](https://img.shields.io/pypi/v/mcp-gmail)](https://pypi.org/project/mcp-gmail/)
+[![PyPI Downloads](https://static.pepy.tech/badge/mcp-gmail)](https://pepy.tech/projects/mcp-gmail)
+![GitHub License](https://img.shields.io/github/license/MindMadeLab/mcp-gmail)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/MindMadeLab/mcp-gmail/release.yml)
+</div>
 
-### Prerequisites
+---
 
-- Python 3.11+
-- [uv](https://docs.astral.sh/uv/) package manager
-- A Google Cloud project with the Gmail API enabled
-- OAuth credentials (`credentials.json`) or a service account key
+## 🤔 What is this?
 
-### Installation
+`mcp-gmail` is a Python-based MCP server that acts as a bridge between any MCP-compatible client (like Claude Desktop, Cursor, or Windsurf) and the Gmail API. It allows you to list, read, search, send, draft, label, and trash emails — all driven by AI through natural language.
+
+---
+
+## 🚀 Quick Start
+
+Essentially the server runs in one line: `uvx mcp-gmail@latest`.
+
+This command will automatically download the latest code and run it. **We recommend always using `@latest`** to ensure you have the newest version with the latest features and bug fixes.
+
+1.  **☁️ Prerequisite: Google Cloud Setup**
+    *   You **must** configure Google Cloud Platform credentials and enable the Gmail API first.
+    *   ➡️ Jump to the [**Detailed Google Cloud Platform Setup**](#-google-cloud-platform-setup-detailed) guide below.
+
+2.  **🐍 Install `uv`**
+    *   `uvx` is part of `uv`, a fast Python package installer. Install it if you haven't:
+        ```bash
+        # macOS / Linux
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        # Windows
+        powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+        ```
+
+3.  **🔐 Authenticate**
+    *   Run the built-in auth command to set up your credentials:
+        ```bash
+        # Point to your OAuth credentials file
+        GMAIL_CREDENTIALS_PATH="/path/to/credentials.json" uvx mcp-gmail@latest auth
+        ```
+    *   This opens your browser for Google sign-in. After granting permission, a `token.json` is saved automatically.
+    *   You only need to do this **once** — subsequent runs use the cached token.
+
+4.  **🏃 Run the Server!**
+    ```bash
+    uvx mcp-gmail@latest
+    ```
+
+5.  **🔌 Connect your MCP Client**
+    *   Configure your client (e.g., Claude Desktop) to connect to the running server.
+    *   ➡️ See [**Usage with Claude Desktop**](#-usage-with-claude-desktop) for config examples.
+
+You're ready! Start issuing commands via your MCP client.
+
+---
+
+## ✨ Key Features
+
+*   **Full Gmail Access:** Read, search, send, draft, label, and trash emails.
+*   **15 Tools** covering all common Gmail operations.
+*   **Flexible Authentication:** Supports OAuth 2.0, Service Accounts, Base64 injection, and Application Default Credentials.
+*   **Pagination:** All list operations support `page_token` and `max_results`.
+*   **Attachments:** Send emails with file attachments.
+*   **Reply Threading:** Reply to existing threads with proper In-Reply-To headers.
+*   **HTML Email:** Send plain text and/or HTML bodies.
+*   **Stdio & SSE Transports:** Works with Claude Desktop, Cursor, and remote/container deployments.
+
+---
+
+## 🔐 Authentication
+
+### The `auth` Command
+
+Before using the MCP server, authenticate with Gmail:
 
 ```bash
-# From PyPI
-uvx mcp-gmail@latest
+# Using OAuth credentials (interactive — opens browser)
+GMAIL_CREDENTIALS_PATH="/path/to/credentials.json" uvx mcp-gmail@latest auth
 
-# From source
-git clone https://github.com/MindMadeLab/mcp-gmail.git
-cd mcp-gmail
-uv run mcp-gmail
+# Specify where to save the token
+GMAIL_CREDENTIALS_PATH="/MindMadeLabpath/to/credentials.json" \
+GMAIL_TOKEN_PATH="/path/to/token.json" \
+uvx mcp-gmail@latest auth
 ```
 
-### Environment Setup
+On success, you'll see:
 
-```bash
-# OAuth (interactive — first run opens browser)
-export GMAIL_CREDENTIALS_PATH="/path/to/credentials.json"
-export GMAIL_TOKEN_PATH="/path/to/token.json"
+```
+Credentials path: /path/to/credentials.json
+Token path:       token.json
 
-# Or service account (headless)
-export GMAIL_SERVICE_ACCOUNT_PATH="/path/to/service_account.json"
+Authenticated as: you@gmail.com
+Total messages:   12345
+Token saved to:   token.json
 ```
 
-## Key Features
+### Authentication Priority
 
-- **Full Gmail access** — read, search, send, draft, label, trash
-- **15 tools** covering all common Gmail operations
-- **Flexible auth** — OAuth, service account, base64 env var, or Application Default Credentials
-- **Pagination** — all list operations support `page_token` and `max_results`
-- **Attachments** — send emails with file attachments
-- **Reply threading** — reply to existing threads with proper headers
-- **HTML email** — send plain text and/or HTML bodies
-- **Stdio and SSE transports** — works with Claude Desktop, Cursor, and remote deployments
+The server checks for credentials in this order:
 
-## Authentication Methods
+1.  `GMAIL_CREDENTIALS_CONFIG` — Base64-encoded service account JSON (env var)
+2.  `GMAIL_SERVICE_ACCOUNT_PATH` — Path to service account key file
+3.  `GMAIL_TOKEN_PATH` — Path to existing OAuth token
+4.  `GMAIL_CREDENTIALS_PATH` — Path to OAuth credentials (interactive browser flow)
+5.  **Application Default Credentials** — `GOOGLE_APPLICATION_CREDENTIALS` / `gcloud` / GCP metadata
 
-Priority order: `GMAIL_CREDENTIALS_CONFIG` → `GMAIL_SERVICE_ACCOUNT_PATH` → `GMAIL_TOKEN_PATH` → `GMAIL_CREDENTIALS_PATH` → Application Default Credentials
+### Method A: OAuth 2.0 (Personal Accounts) 🧑‍💻
 
-### Method A: Base64-Encoded Service Account (containers)
+Best for personal use or local development.
 
-- Set `GMAIL_CREDENTIALS_CONFIG` to the base64-encoded content of your service account JSON
-- No files needed — ideal for Docker / CI / serverless
-- Requires domain-wide delegation for accessing user mailboxes
+1.  Set up OAuth credentials in Google Cloud Console (see [GCP Setup](#-google-cloud-platform-setup-detailed))
+2.  Run `mcp-gmail auth` to authenticate via browser
+3.  Token is cached for future use with automatic refresh
 
-### Method B: Service Account File
+*   `GMAIL_CREDENTIALS_PATH` — Path to OAuth `credentials.json` (default: `credentials.json`)
+*   `GMAIL_TOKEN_PATH` — Where to store the token (default: `token.json`)
 
-- Set `GMAIL_SERVICE_ACCOUNT_PATH` to the path of your service account JSON key file
-- Default: `service_account.json` in the working directory
-- Requires domain-wide delegation for accessing user mailboxes
+### Method B: Service Account (Servers/Automation) ✅
 
-### Method C: OAuth2 (interactive, personal accounts)
+Best for headless environments. Requires [domain-wide delegation](https://developers.google.com/identity/protocols/oauth2/service-account#delegatingauthority) for accessing user mailboxes.
 
-- Set `GMAIL_CREDENTIALS_PATH` to the path of your OAuth `credentials.json`
-- Set `GMAIL_TOKEN_PATH` to where the token should be stored (default: `token.json`)
-- First run opens a browser for Google sign-in
-- Subsequent runs use the cached token with automatic refresh
+*   `GMAIL_SERVICE_ACCOUNT_PATH` — Path to service account JSON key (default: `service_account.json`)
 
-### Method D: Application Default Credentials
+### Method C: Base64-Encoded Credentials (Containers) 🔒
 
-- Uses `GOOGLE_APPLICATION_CREDENTIALS` environment variable
-- Falls back to active `gcloud auth application-default login`
-- Falls back to GCP metadata service (for Cloud Run, GKE, etc.)
+Best for Docker, Kubernetes, CI/CD where file mounting is impractical.
 
-## Available Tools (15 Total)
+*   `GMAIL_CREDENTIALS_CONFIG` — Base64-encoded content of your service account JSON
+*   Generate with: `base64 -w 0 service_account.json`
+
+### Method D: Application Default Credentials (GCP) 🌐
+
+Best for Google Cloud environments (Cloud Run, GKE, Compute Engine).
+
+*   Uses `GOOGLE_APPLICATION_CREDENTIALS` or `gcloud auth application-default login`
+*   No additional env vars needed — used as automatic fallback
+
+---
+
+## 🛠️ Available Tools (15 Total)
 
 ### Read Operations
 
-- `gmail_list_messages` — List messages with query, labels, pagination (1-500 per page)
-- `gmail_get_message` — Get full message by ID (headers, body, attachments)
-- `gmail_search_messages` — Search with Gmail query syntax, returns full details (1-100 per page)
-- `gmail_list_drafts` — List drafts with pagination and query filter
+*   **`gmail_list_messages`** — List messages with query, labels, pagination (1-500 per page)
+    *   `query` (optional): Gmail search query (e.g. `"is:unread"`, `"from:alice@example.com"`)
+    *   `label_ids` (optional): Filter by label IDs (e.g. `["INBOX"]`)
+    *   `max_results` (optional, default 20): Messages per page (1-500)
+    *   `page_token` (optional): Token for next page
+    *   `include_spam_trash` (optional, default false): Include spam/trash
+    *   _Returns:_ `{messages: [{id, thread_id, snippet, subject, from, date}], next_page_token, result_size_estimate}`
+
+*   **`gmail_get_message`** — Get full message by ID (headers, body, attachments)
+    *   `message_id`: The Gmail message ID
+    *   _Returns:_ `{id, thread_id, subject, from, to, cc, date, body_text, body_html, labels, attachments}`
+
+*   **`gmail_search_messages`** — Search with Gmail query syntax, returns full details (1-100 per page)
+    *   `query`: Gmail search query (e.g. `"has:attachment after:2024/01/01"`)
+    *   `max_results` (optional, default 10): Results per page (1-100)
+    *   `page_token` (optional): Token for next page
+    *   _Returns:_ `{messages: [{full message details}], next_page_token, result_size_estimate}`
+
+*   **`gmail_list_drafts`** — List drafts with pagination and query filter
+    *   `max_results` (optional, default 20): Drafts per page (1-500)
+    *   `page_token` (optional): Token for next page
+    *   `query` (optional): Gmail search query to filter drafts
+    *   _Returns:_ `{drafts: [{draft_id, message_id, subject, to, snippet}], next_page_token, result_size_estimate}`
 
 ### Send Operations
 
-- `gmail_send_message` — Send email with to/cc/bcc, HTML body, attachments, reply threading
-- `gmail_create_draft` — Create a draft without sending
-- `gmail_update_draft` — Update an existing draft (merges provided fields with existing)
-- `gmail_delete_draft` — Permanently delete a draft
-- `gmail_send_draft` — Send an existing draft
+*   **`gmail_send_message`** — Send email with to/cc/bcc, HTML body, attachments, reply threading
+    *   `to`, `subject`, `body` (required)
+    *   `cc`, `bcc`, `html_body`, `attachment_paths` (optional)
+    *   `reply_to_message_id`, `thread_id` (optional, for threading)
+    *   _Returns:_ `{id, thread_id, label_ids}`
+
+*   **`gmail_create_draft`** — Create a draft without sending (same params as send)
+    *   _Returns:_ `{draft_id, message_id}`
+
+*   **`gmail_update_draft`** — Update an existing draft (merges provided fields with existing)
+    *   `draft_id` (required), all other fields optional
+    *   _Returns:_ `{draft_id, message_id}`
+
+*   **`gmail_delete_draft`** — Permanently delete a draft
+    *   `draft_id` (required)
+    *   _Returns:_ `{success: true}`
+
+*   **`gmail_send_draft`** — Send an existing draft
+    *   `draft_id` (required)
+    *   _Returns:_ `{message_id, thread_id}`
 
 ### Label Operations
 
-- `gmail_list_labels` — List all labels (system and user-created)
-- `gmail_create_label` — Create a new label (supports nesting with "/")
-- `gmail_delete_label` — Delete a user label
-- `gmail_modify_message_labels` — Add/remove labels from a message
+*   **`gmail_list_labels`** — List all labels (system and user-created)
+    *   _Returns:_ `{labels: [{id, name, type}]}`
+
+*   **`gmail_create_label`** — Create a new label (supports nesting with `/`)
+    *   `name`: Label name (e.g. `"Projects/Work"`)
+    *   _Returns:_ `{id, name}`
+
+*   **`gmail_delete_label`** — Delete a user label (system labels cannot be deleted)
+    *   `label_id`: The label ID
+    *   _Returns:_ `{success: true}`
+
+*   **`gmail_modify_message_labels`** — Add/remove labels from a message
+    *   `message_id` (required)
+    *   `add_label_ids` (optional): Label IDs to add
+    *   `remove_label_ids` (optional): Label IDs to remove
+    *   _Returns:_ `{id, label_ids}`
 
 ### Trash Operations
 
-- `gmail_trash_message` — Move a message to trash (auto-deleted after 30 days)
-- `gmail_untrash_message` — Restore a message from trash
+*   **`gmail_trash_message`** — Move a message to trash (auto-deleted after 30 days)
+    *   `message_id`: The message ID
+    *   _Returns:_ `{id, label_ids}`
 
-## Claude Desktop Configuration
+*   **`gmail_untrash_message`** — Restore a message from trash
+    *   `message_id`: The message ID
+    *   _Returns:_ `{id, label_ids}`
+
+---
+
+## 🔌 Usage with Claude Desktop
+
+Add the server config to your `claude_desktop_config.json`:
+
+<details>
+<summary>🔵 Config: uvx + OAuth (Recommended for personal use)</summary>
 
 ```json
 {
@@ -120,7 +247,14 @@ Priority order: `GMAIL_CREDENTIALS_CONFIG` → `GMAIL_SERVICE_ACCOUNT_PATH` → 
 }
 ```
 
-### With Service Account
+**🍎 macOS Note:** If you get a `spawn uvx ENOENT` error, use the full path:
+```json
+"command": "/Users/yourusername/.local/bin/uvx"
+```
+</details>
+
+<details>
+<summary>🔵 Config: uvx + Service Account</summary>
 
 ```json
 {
@@ -135,21 +269,26 @@ Priority order: `GMAIL_CREDENTIALS_CONFIG` → `GMAIL_SERVICE_ACCOUNT_PATH` → 
   }
 }
 ```
+</details>
 
-### From Source (development)
+<details>
+<summary>🟡 Config: Development (from cloned repo)</summary>
 
 ```json
 {
   "mcpServers": {
     "gmail": {
       "command": "uv",
-      "args": ["--directory", "/path/to/mcp-gmail", "run", "mcp-gmail"]
+      "args": ["run", "--directory", "/path/to/mcp-gmail", "mcp-gmail"]
     }
   }
 }
 ```
+</details>
 
-## Cursor / Windsurf Configuration
+---
+
+## ⚙️ Usage with Cursor / Windsurf
 
 ```json
 {
@@ -166,34 +305,44 @@ Priority order: `GMAIL_CREDENTIALS_CONFIG` → `GMAIL_SERVICE_ACCOUNT_PATH` → 
 }
 ```
 
-## SSE Transport (remote / container)
+---
+
+## 🐳 SSE Transport (Remote / Container)
 
 ```bash
 uv run mcp-gmail --transport sse
 ```
 
-Environment variables for SSE mode:
+| Variable | Default | Description |
+|:---------|:--------|:------------|
+| `HOST` / `FASTMCP_HOST` | `0.0.0.0` | Bind address |
+| `PORT` / `FASTMCP_PORT` | `8000` | Listen port |
+
+---
+
+## ☁️ Google Cloud Platform Setup (Detailed)
+
+This setup is **required** before running the server.
+
+1.  **Create/Select a GCP Project** — Go to the [Google Cloud Console](https://console.cloud.google.com/)
+2.  **Enable the Gmail API** — Navigate to "APIs & Services" → "Library", search for "Gmail API", click Enable
+3.  **Configure OAuth Consent Screen** — Go to "APIs & Services" → "OAuth consent screen", select External, fill in app name and contact email, add the scope `https://www.googleapis.com/auth/gmail.modify`
+4.  **Create OAuth Credentials** — Go to "APIs & Services" → "Credentials" → "Create Credentials" → "OAuth 2.0 Client ID", select **Desktop application**
+5.  **Download Credentials** — Click the download button and save as `credentials.json`
+6.  **Authenticate** — Run the auth command:
+    ```bash
+    GMAIL_CREDENTIALS_PATH="/path/to/credentials.json" uvx mcp-gmail@latest auth
+    ```
+    Complete the browser sign-in. A `token.json` will be saved for future use.
+
+For **Service Accounts**: Go to Credentials → Create Credentials → Service Account, create a key (JSON), download it. Note: Service accounts require [domain-wide delegation](https://developers.google.com/identity/protocols/oauth2/service-account#delegatingauthority) for Gmail access.
+
+---
+
+## 🔧 Environment Variables Reference
 
 | Variable | Default | Description |
-|----------|---------|-------------|
-| `HOST` | `0.0.0.0` | Bind address |
-| `PORT` | `8000` | Listen port |
-
-## Google Cloud Platform Setup (Detailed)
-
-1. **Create a Google Cloud project** at https://console.cloud.google.com
-2. **Enable the Gmail API** — go to APIs & Services > Library, search for "Gmail API", click Enable
-3. **Configure the OAuth consent screen** — go to APIs & Services > OAuth consent screen, select External, fill in app name and contact email
-4. **Create OAuth credentials** — go to APIs & Services > Credentials > Create Credentials > OAuth 2.0 Client ID, select "Desktop application"
-5. **Download credentials** — click the download button on your new credential and save as `credentials.json`
-6. **First authentication** — run `uv run mcp-gmail` and complete the browser sign-in. A `token.json` will be saved for future use.
-
-For service accounts: go to Credentials > Create Credentials > Service Account, create a key (JSON), and download it.
-
-## Environment Variables Reference
-
-| Variable | Default | Description |
-|----------|---------|-------------|
+|:---------|:--------|:------------|
 | `GMAIL_CREDENTIALS_CONFIG` | — | Base64-encoded service account JSON |
 | `GMAIL_SERVICE_ACCOUNT_PATH` | `service_account.json` | Path to service account key file |
 | `GMAIL_TOKEN_PATH` | `token.json` | Path to OAuth token file |
@@ -201,16 +350,35 @@ For service accounts: go to Credentials > Create Credentials > Service Account, 
 | `HOST` / `FASTMCP_HOST` | `0.0.0.0` | SSE transport bind address |
 | `PORT` / `FASTMCP_PORT` | `8000` | SSE transport port |
 
-## Example Prompts for Claude
+---
 
-- "List my 10 most recent unread emails"
-- "Search for emails from alice@example.com with attachments"
-- "Send an email to bob@example.com with subject 'Meeting Notes' and body 'Here are the notes from today's meeting.'"
-- "Create a draft reply to the last email from my manager"
-- "Label all emails from newsletter@example.com as 'Newsletters'"
-- "Trash all promotional emails from the last week"
-- "Show me the full content of message ID abc123"
+## 💬 Example Prompts for Claude
 
-## License
+*   "List my 10 most recent unread emails"
+*   "Search for emails from alice@example.com with attachments"
+*   "Send an email to bob@example.com with subject 'Meeting Notes' and the body 'Here are the notes from today.'"
+*   "Create a draft reply to the last email from my manager"
+*   "Label all emails from newsletter@example.com as 'Newsletters'"
+*   "Trash all promotional emails from the last week"
+*   "Show me the full content of message ID abc123"
+*   "What are my unread emails about project deadlines?"
 
-MIT
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please open an issue to discuss bugs or feature requests. Pull requests are appreciated.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Credits
+
+*   Built with [FastMCP](https://github.com/jlowin/fastmcp)
+*   Uses [Google API Python Client](https://github.com/googleapis/google-api-python-client)
+*   Inspired by [mcp-google-sheets](https://github.com/xing5/mcp-google-sheets)

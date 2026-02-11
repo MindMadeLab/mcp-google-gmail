@@ -876,7 +876,31 @@ def gmail_untrash_message(ctx: Context, message_id: str) -> dict:
 # ---------------------------------------------------------------------------
 
 
+def auth():
+    """Run OAuth flow and verify authentication."""
+    print(f"Credentials path: {CREDENTIALS_PATH}")
+    print(f"Token path:       {TOKEN_PATH}")
+    print()
+
+    try:
+        service = _authenticate()
+        profile = service.users().getProfile(userId="me").execute()
+        print(f"Authenticated as: {profile['emailAddress']}")
+        print(f"Total messages:   {profile['messagesTotal']}")
+        print(f"Token saved to:   {TOKEN_PATH}")
+    except FileNotFoundError as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"Authentication failed: {e}")
+        sys.exit(1)
+
+
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] == "auth":
+        auth()
+        return
+
     transport = "stdio"
     for i, arg in enumerate(sys.argv):
         if arg == "--transport" and i + 1 < len(sys.argv):
