@@ -1,5 +1,5 @@
 [project]
-name = "mcp-gmail"
+name = "mcp-google-gmail"
 version = "0.1.0"
 description = "MCP server for Gmail API — list, read, send, draft, label, and trash emails"
 readme = "README.md"
@@ -21,11 +21,11 @@ name = "MindMadeLab"
 "Repository" = "https://github.com/MindMadeLab/mcp-gmail.git"
 
 [project.scripts]
-mcp-gmail = "mcp_gmail:main"
+mcp-google-gmail = "mcp_google_gmail:main"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/mcp_gmail"]
+packages = ["src/mcp_google_gmail"]

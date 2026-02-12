@@ -1,12 +1,12 @@
 <div align="center">
-  <b>mcp-gmail</b>
+  <b>mcp-google-gmail</b>
 
   <p align="center">
     <i>Your AI Assistant's Gateway to Gmail!</i> 📧
   </p>
 
-[![PyPI - Version](https://img.shields.io/pypi/v/mcp-gmail)](https://pypi.org/project/mcp-gmail/)
-[![PyPI Downloads](https://static.pepy.tech/badge/mcp-gmail)](https://pepy.tech/projects/mcp-gmail)
+[![PyPI - Version](https://img.shields.io/pypi/v/mcp-google-gmail)](https://pypi.org/project/mcp-google-gmail/)
+[![PyPI Downloads](https://static.pepy.tech/badge/mcp-google-gmail)](https://pepy.tech/projects/mcp-google-gmail)
 ![GitHub License](https://img.shields.io/github/license/MindMadeLab/mcp-gmail)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/MindMadeLab/mcp-gmail/release.yml)
 </div>
@@ -15,13 +15,13 @@
 
 ## 🤔 What is this?
 
-`mcp-gmail` is a Python-based MCP server that acts as a bridge between any MCP-compatible client (like Claude Desktop, Cursor, or Windsurf) and the Gmail API. It allows you to list, read, search, send, draft, label, and trash emails — all driven by AI through natural language.
+`mcp-google-gmail` is a Python-based MCP server that acts as a bridge between any MCP-compatible client (like Claude Desktop, Cursor, or Windsurf) and the Gmail API. It allows you to list, read, search, send, draft, label, and trash emails — all driven by AI through natural language.
 
 ---
 
 ## 🚀 Quick Start
 
-Essentially the server runs in one line: `uvx mcp-gmail@latest`.
+Essentially the server runs in one line: `uvx mcp-google-gmail@latest`.
 
 This command will automatically download the latest code and run it. **We recommend always using `@latest`** to ensure you have the newest version with the latest features and bug fixes.
 
@@ -42,14 +42,14 @@ This command will automatically download the latest code and run it. **We recomm
     *   Run the built-in auth command to set up your credentials:
         ```bash
         # Point to your OAuth credentials file
-        GMAIL_CREDENTIALS_PATH="/path/to/credentials.json" uvx mcp-gmail@latest auth
+        GMAIL_CREDENTIALS_PATH="/path/to/credentials.json" uvx mcp-google-gmail@latest auth
         ```
     *   This opens your browser for Google sign-in. After granting permission, a `token.json` is saved automatically.
     *   You only need to do this **once** — subsequent runs use the cached token.
 
 4.  **🏃 Run the Server!**
     ```bash
-    uvx mcp-gmail@latest
+    uvx mcp-google-gmail@latest
     ```
 
 5.  **🔌 Connect your MCP Client**
@@ -81,12 +81,12 @@ Before using the MCP server, authenticate with Gmail:
 
 ```bash
 # Using OAuth credentials (interactive — opens browser)
-GMAIL_CREDENTIALS_PATH="/path/to/credentials.json" uvx mcp-gmail@latest auth
+GMAIL_CREDENTIALS_PATH="/path/to/credentials.json" uvx mcp-google-gmail@latest auth
 
 # Specify where to save the token
-GMAIL_CREDENTIALS_PATH="/MindMadeLabpath/to/credentials.json" \
+GMAIL_CREDENTIALS_PATH="/path/to/credentials.json" \
 GMAIL_TOKEN_PATH="/path/to/token.json" \
-uvx mcp-gmail@latest auth
+uvx mcp-google-gmail@latest auth
 ```
 
 On success, you'll see:
@@ -115,7 +115,7 @@ The server checks for credentials in this order:
 Best for personal use or local development.
 
 1.  Set up OAuth credentials in Google Cloud Console (see [GCP Setup](#-google-cloud-platform-setup-detailed))
-2.  Run `mcp-gmail auth` to authenticate via browser
+2.  Run `mcp-google-gmail auth` to authenticate via browser
 3.  Token is cached for future use with automatic refresh
 
 *   `GMAIL_CREDENTIALS_PATH` — Path to OAuth `credentials.json` (default: `credentials.json`)
@@ -237,7 +237,7 @@ Add the server config to your `claude_desktop_config.json`:
   "mcpServers": {
     "gmail": {
       "command": "uvx",
-      "args": ["mcp-gmail@latest"],
+      "args": ["mcp-google-gmail@latest"],
       "env": {
         "GMAIL_CREDENTIALS_PATH": "/path/to/credentials.json",
         "GMAIL_TOKEN_PATH": "/path/to/token.json"
@@ -261,7 +261,7 @@ Add the server config to your `claude_desktop_config.json`:
   "mcpServers": {
     "gmail": {
       "command": "uvx",
-      "args": ["mcp-gmail@latest"],
+      "args": ["mcp-google-gmail@latest"],
       "env": {
         "GMAIL_SERVICE_ACCOUNT_PATH": "/path/to/service_account.json"
       }
@@ -279,7 +279,7 @@ Add the server config to your `claude_desktop_config.json`:
   "mcpServers": {
     "gmail": {
       "command": "uv",
-      "args": ["run", "--directory", "/path/to/mcp-gmail", "mcp-gmail"]
+      "args": ["run", "--directory", "/path/to/mcp-gmail", "mcp-google-gmail"]
     }
   }
 }
@@ -295,7 +295,7 @@ Add the server config to your `claude_desktop_config.json`:
   "mcpServers": {
     "gmail": {
       "command": "uvx",
-      "args": ["mcp-gmail@latest"],
+      "args": ["mcp-google-gmail@latest"],
       "env": {
         "GMAIL_CREDENTIALS_PATH": "/path/to/credentials.json",
         "GMAIL_TOKEN_PATH": "/path/to/token.json"
@@ -310,7 +310,7 @@ Add the server config to your `claude_desktop_config.json`:
 ## 🐳 SSE Transport (Remote / Container)
 
 ```bash
-uv run mcp-gmail --transport sse
+uv run mcp-google-gmail --transport sse
 ```
 
 | Variable | Default | Description |
@@ -331,7 +331,7 @@ This setup is **required** before running the server.
 5.  **Download Credentials** — Click the download button and save as `credentials.json`
 6.  **Authenticate** — Run the auth command:
     ```bash
-    GMAIL_CREDENTIALS_PATH="/path/to/credentials.json" uvx mcp-gmail@latest auth
+    GMAIL_CREDENTIALS_PATH="/path/to/credentials.json" uvx mcp-google-gmail@latest auth
     ```
     Complete the browser sign-in. A `token.json` will be saved for future use.
 
