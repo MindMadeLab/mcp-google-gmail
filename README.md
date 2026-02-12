@@ -158,11 +158,11 @@ Best for Google Cloud environments (Cloud Run, GKE, Compute Engine).
     *   `message_id`: The Gmail message ID
     *   _Returns:_ `{id, thread_id, subject, from, to, cc, date, body_text, body_html, labels, attachments}`
 
-*   **`gmail_search_messages`** — Search with Gmail query syntax, returns full details (1-100 per page)
+*   **`gmail_search_messages`** — Search with Gmail query syntax, returns compact summaries (1-100 per page). Use `gmail_get_message` to read the full body of a result.
     *   `query`: Gmail search query (e.g. `"has:attachment after:2024/01/01"`)
     *   `max_results` (optional, default 10): Results per page (1-100)
     *   `page_token` (optional): Token for next page
-    *   _Returns:_ `{messages: [{full message details}], next_page_token, result_size_estimate}`
+    *   _Returns:_ `{messages: [{id, thread_id, snippet, subject, from, to, date, labels}], next_page_token, result_size_estimate}`
 
 *   **`gmail_list_drafts`** — List drafts with pagination and query filter
     *   `max_results` (optional, default 20): Drafts per page (1-500)

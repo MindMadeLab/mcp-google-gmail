@@ -430,7 +430,9 @@ def gmail_search_messages(
     max_results: int = 10,
     page_token: str | None = None,
 ) -> dict:
-    """Search messages with full details for each result.
+    """Search messages using Gmail query syntax. Returns compact summaries.
+
+    Use gmail_get_message to read the full body of a specific result.
 
     Args:
         ctx: MCP context (injected automatically).
@@ -451,10 +453,29 @@ def gmail_search_messages(
             msg = (
                 service.users()
                 .messages()
-                .get(userId="me", id=stub["id"], format="full")
+                .get(
+                    userId="me",
+                    id=stub["id"],
+                    format="metadata",
+                    metadataHeaders=["Subject", "From", "To", "Date"],
+                )
                 .execute()
             )
-            messages.append(_parse_full_message(msg))
+            headers = {
+                h["name"]: h["value"] for h in msg.get("payload", {}).get("headers", [])
+            }
+            messages.append(
+                {
+                    "id": msg["id"],
+                    "thread_id": msg["threadId"],
+                    "snippet": msg.get("snippet", ""),
+                    "subject": headers.get("Subject", ""),
+                    "from": headers.get("From", ""),
+                    "to": headers.get("To", ""),
+                    "date": headers.get("Date", ""),
+                    "labels": msg.get("labelIds", []),
+                }
+            )
         return {
             "messages": messages,
             "next_page_token": response.get("nextPageToken"),
