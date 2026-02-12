@@ -7,8 +7,7 @@
 
 [![PyPI - Version](https://img.shields.io/pypi/v/mcp-google-gmail)](https://pypi.org/project/mcp-google-gmail/)
 [![PyPI Downloads](https://static.pepy.tech/badge/mcp-google-gmail)](https://pepy.tech/projects/mcp-google-gmail)
-![GitHub License](https://img.shields.io/github/license/MindMadeLab/mcp-gmail)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/MindMadeLab/mcp-gmail/release.yml)
+![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
 </div>
 
 ---
